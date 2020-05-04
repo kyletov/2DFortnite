@@ -1,0 +1,16 @@
+Features: For each feature you implement, move to the Implemented section and
+explain who did it (utorid) and how you did it. You can consider these as
+almost user stories, if you just add a bit to them. Add more features/user stories at the bottom.
+Move them up when completed.
+
+------------------------------------------------------------------------------------
+Implemented:
+
+------------------------------------------------------------------------------------
+Unimplemented:
+
+0) React
+   Done by: 
+   Explanation:
+
+------------------------------------------------------------------------------------

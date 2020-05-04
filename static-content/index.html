@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta HTTP-EQUIV="EXPIRES" CONTENT="-1">
+		<title>Computing Science 309</title>
+
+		<script src="jquery-3.3.1.min.js"></script>
+
+		<script language="javascript" src="model.js" > </script>
+		<script language="javascript" src="controller.js" > </script>
+		<script language="javascript" src="action.js" > </script>
+		<script src="lib/react.js"></script>
+		<script src="lib/react-dom.js"></script>
+		<script src="lib/babel.min.js"></script>
+
+		<script type="text/babel">
+
+			class Button extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<button onClick={this.props.clickHandler} > {this.props.value} </button>
+					);
+				}
+			}
+
+			class PlayerName extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<table>
+							<tbody>
+								<tr>
+									<td>Player: </td>
+									<td name="player_name">{this.props.name}</td>
+								</tr>
+							</tbody>
+						</table>
+					);
+				}
+			}
+
+			class GameCanvas extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<canvas id="stage" width="800" height="800" style={{border:"1px solid black"}} > </canvas>
+					);
+				}
+			}
+
+			class LoginView extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+
+				render(props){
+					return (
+						<center>
+			        		<header><img style={{margin:0, padding:0}} src="icons\Title.jpg" width="548" height="148"/></header>
+							<input type="text" name="username" required placeholder="User Name" />
+							<input type="password" name="password" required placeholder="Password" />
+							<Button clickHandler={this.props.loginClickHandler} value="Login" />
+							<Button clickHandler={this.props.signupClickHandler} value="Signup" />
+						</center>
+					);
+				}
+			}
+
+			class RegisterView extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<center>
+							<h1>Register to play</h1>
+							<input type="text" name="newusername" required placeholder="User Name" />
+							<input type="password" name="newpassword" required placeholder="Password" />
+							<input type="password" name="newconfirm_password" required placeholder="Confirm Password" />
+							<Button clickHandler={this.props.registerClickHandler} value="Register" />
+							<Button clickHandler={this.props.backClickHandler} value="Back" />
+						</center>
+					);
+				}
+			}
+
+			class MenuView extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<center>
+							<h1>f0rt9it32d</h1>
+							<p>Menu</p>
+							<table>
+								<tbody>
+									<tr><td><Button clickHandler={this.props.playClickHandler} value="Play" /></td></tr>
+									<tr><td><Button clickHandler={this.props.gameStatsClickHandler} value="Game Stats" /></td></tr>
+									<tr><td><Button clickHandler={this.props.logoutClickHandler} value="Logout" /></td></tr>
+								</tbody>
+							</table>
+						</center>
+					);
+				}
+			}
+
+			class GameStatsView extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<center>
+							<h1>f0rt9it32d</h1>
+							<p>Game Stats</p>
+							<table id="gamestats"></table>
+							<Button clickHandler={this.props.backClickHandler} value="Back" />
+						</center>
+					);
+				}
+			}
+
+			class PlayView extends React.Component {
+				constructor(props) {
+					super(props);
+				}
+				render(props){
+					return (
+						<center>
+							<h1>f0rt9it32d</h1>
+							<PlayerName name={this.props.player} />
+							<GameCanvas />
+							<table>
+								<tbody>
+									<tr>
+										<td><Button clickHandler={this.props.restartClickHandler} value="Restart" /></td>
+										<td><Button clickHandler={this.props.backClickHandler} value="Back" /></td>
+									</tr>
+								</tbody>
+							</table>
+						</center>
+					);
+				}
+			}
+
+			class ViewComponent extends React.Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						"currentView": this.props.view,
+						"player": "",
+						"isLoggedIn": false,
+						"previousView": this.props.view
+					}
+					this.loginButtonClickHandler = this.loginButtonClickHandler.bind(this);
+					this.signupButtonClickHandler = this.signupButtonClickHandler.bind(this);
+					this.registerButtonClickHandler = this.registerButtonClickHandler.bind(this);
+					this.backButtonClickHandler = this.backButtonClickHandler.bind(this);
+					this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
+					this.restartButtonClickHandler = this.restartButtonClickHandler.bind(this);
+					this.gameStatsButtonClickHandler = this.gameStatsButtonClickHandler.bind(this);
+					this.logoutButtonClickHandler = this.logoutButtonClickHandler.bind(this);
+				}
+
+				loginButtonClickHandler(e){
+					// Clear previous error messages
+					$("#error").html("");
+
+					var username = $("input[name='username']").val();
+					var password = $("input[name='password']").val();
+
+					if (username == ""){
+						$("#error").html("username is required.<br>");
+					}
+
+					if (password == ""){
+						$("#error").append("password is required.<br>");
+					}
+
+					var msg;
+					if ($("#error").html() == ""){
+						$.ajax({
+							method: "POST",
+							url: "/ftd/api/login/" + username + "/" + password,
+							success: (data) => { msg = data.msg; }
+						}).done(function(data){
+
+							if (data.error) {
+								$("#error").html(data.error);
+							} else {
+								$("#error").html("");
+							}
+
+							if (data.msg == "Login successful!"){
+								alert(data.msg);
+							} else {
+								$("#error").html(data.msg);
+							}
+
+						}).always(function(data){
+							// Clear password field for retyping
+							$("input[name='password']").val("");
+						});
+					}
+					let promise = new Promise(resolve => setTimeout(resolve, 1000));
+					promise.then(() => {
+						if (msg == "Login successful!"){
+							this.setState( (prevState, props) => {
+								return { "currentView": "MenuView", "player": username, "isLoggedIn": true, "previousView": prevState.currentView };
+							});
+						}
+					});
+				}
+
+				signupButtonClickHandler(e){
+					// Clear previous error messages
+					$("#error").html("");
+
+					this.setState( (prevState, props) => {
+						return { "currentView": "RegisterView", "player": prevState.player, "isLoggedIn": prevState.isLoggedIn, "previousView": prevState.currentView };
+					});
+				}
+
+				registerButtonClickHandler(e){
+					// Clear previous error messages
+					$("#error").html("");
+
+					var username = $("input[name='newusername']").val();
+					var password = $("input[name='newpassword']").val();
+					var confirm_password = $("input[name='newconfirm_password']").val();
+
+					if (username == ""){
+						$("#error").html("username is required.<br>");
+					}
+
+					if (password == ""){
+						$("#error").append("password is required.<br>");
+					}
+
+					if (confirm_password == ""){
+						$("#error").append("confirm password is required.<br>");
+					}
+
+					var msg;
+					if ($("#error").html() == "") {
+
+						if (password != confirm_password){
+							$("#error").append("passwords don't match.<br>");
+						} else {
+							$.ajax({
+								method: "POST",
+								url: "/ftd/api/register/" + username + "/" + password,
+								success: (data) => { msg = data.msg ? data.msg : ""; }
+							}).done(function(data){
+								alert(data.msg);
+
+							}).fail(function(data){
+
+								if (data.responseJSON.error == "SQLITE_CONSTRAINT: UNIQUE constraint failed: appuser.username") {
+									$("#error").html("User already exists.");
+								} else {
+									$("#error").html("An unexpected error occured, please try again.");
+								}
+
+							});
+						}
+
+						// Clear password fields for retyping after submitting
+						$("input[name='newpassword']").val("");
+						$("input[name='newconfirm_password']").val("");
+					}
+
+					let promise = new Promise(resolve => setTimeout(resolve, 1000));
+					promise.then(() => {
+						if (msg == "Register successful!"){
+							this.setState( (prevState, props) => {
+								return { "currentView": "MenuView", "player": username, "isLoggedIn": true, "previousView": prevState.currentView };
+							});
+						}
+					});
+				}
+
+				backButtonClickHandler(e){
+					// Clear previous error messages
+					$("#error").html("");
+
+					if (this.state.currentView == "PlayView"){
+						pauseGame();
+					}
+
+					this.setState( (prevState, props) => {
+						return { "currentView": prevState.previousView, "player": prevState.player, "isLoggedIn": prevState.isLoggedIn, "previousView": prevState.currentView };
+					});
+				}
+
+				playButtonClickHandler(e){
+
+					this.setState( (prevState, props) => {
+						return { "currentView": "PlayView", "player": prevState.player, "isLoggedIn": prevState.isLoggedIn, "previousView": prevState.currentView };
+					});
+          goOnline();
+					let promise = new Promise(resolve => setTimeout(resolve, 100));
+					promise.then(() => {
+						console.log("is game running? "+gameRunning());
+						if (!gameRunning()){
+							setupGame();
+						}
+						startGame();
+					});
+				}
+
+				restartButtonClickHandler(e){
+					this.setState( (prevState, props) => {
+						return { "currentView": "PlayView", "player": prevState.player, "isLoggedIn": prevState.isLoggedIn, "previousView": prevState.previousView };
+					});
+
+					let promise = new Promise(resolve => setTimeout(resolve, 100));
+					promise.then(() => {
+						if (!gameRunning()){
+							startGame();
+						}
+						setupGame();
+					});
+				}
+
+				gameStatsButtonClickHandler(e){
+
+					viewgamestats();
+
+					this.setState( (prevState, props) => {
+						return { "currentView": "GameStatsView", "player": prevState.player, "isLoggedIn": prevState.isLoggedIn, "previousView": prevState.currentView };
+					});
+
+				}
+
+				logoutButtonClickHandler(e){
+
+					this.setState( (prevState, props) => {
+						return { "currentView": "LoginView", "player":"", "isLoggedIn": false, "previousView": prevState.currentView };
+					});
+				}
+
+				render(){
+					if (this.state.currentView == "LoginView"){
+						return (<LoginView loginClickHandler={this.loginButtonClickHandler} signupClickHandler={this.signupButtonClickHandler} />);
+					}
+
+					else if (this.state.currentView == "RegisterView"){
+						return (<RegisterView registerClickHandler={this.registerButtonClickHandler} backClickHandler={this.backButtonClickHandler} />);
+					}
+
+					else if (this.state.currentView == "MenuView"){
+						return (<MenuView playClickHandler={this.playButtonClickHandler} gameStatsClickHandler={this.gameStatsButtonClickHandler} logoutClickHandler={this.logoutButtonClickHandler} />);
+					}
+
+					else if (this.state.currentView == "GameStatsView"){
+						return (<GameStatsView backClickHandler={this.backButtonClickHandler} />);
+					}
+
+					else if (this.state.currentView == "PlayView"){
+						return (<PlayView player={this.state.player} restartClickHandler={this.restartButtonClickHandler} backClickHandler={this.backButtonClickHandler} />);
+					}
+
+					else {
+						return (<LoginView loginClickHandler={this.loginButtonClickHandler} signupClickHandler={this.signupButtonClickHandler} />);
+					}
+				}
+			}
+			ReactDOM.render( <ViewComponent view="LoginView" />, document.getElementById("interface"));
+		</script>
+
+		<style>
+			table#gamestats {
+				border: 1px solid black;
+				padding: 30px;
+				width: 75%;
+				text-align: center;
+			}
+			input {
+				display: block;
+				margin: 2px;
+			}
+		</style>
+	</head>
+	<body bgcolor=ffffff>
+		<div id="interface"></div>
+		<div id="error"></div>
+	</body>
+</html>
